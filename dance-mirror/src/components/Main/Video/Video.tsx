@@ -24,8 +24,8 @@ import React, { Component } from "react";
 import ReactPlayer from "react-player";
 //import $ from 'jquery'
 import 'bootstrap'
-import noUiSlider from 'nouislider';
-import 'nouislider/dist/nouislider.css';
+import Nouislider from "nouislider-react";
+import "nouislider/distribute/nouislider.css";
 //import 'jquery'
 //<><script src="//code.jquery.com/jquery-1.10.2.js"></script><script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script></>
 
@@ -38,8 +38,8 @@ class MediaComponent extends Component {
     this.ref = React.createRef()
   }
 
-  state = { playing:false, playbackRate:1, mirrored:false, played:0}
-  
+  state = { playing:false, playbackRate:1, mirrored:false, played:0, seeking:false}
+
 
   handlePlayPause = () => {
     this.setState({ playing: !this.state.playing })
@@ -72,18 +72,38 @@ class MediaComponent extends Component {
     }
   }
 
-  handleSeekMouseDown = e => {
-    this.setState({ seeking: true })
-  }
-
   handleSeekChange = e => {
+    console.log("seekchange", this.state.played)
+    this.setState({ seeking: true })
+    // update the progress bar
     this.setState({ played: parseFloat(e.target.value) })
+    const player = this.ref.current
+    // update the video by going to the correct time
+    player.seekTo(parseFloat(e.target.value))
   }
 
-  handleSeekMouseUp = e => {
-    this.setState({ seeking: false })
-    const player = this.ref.current
-    player.seekTo(parseFloat(e.target.value))
+  handleProgress = state => {
+    console.log('onProgress', state)
+    // We only want to update time slider if we are not currently seeking
+    if (!this.state.seeking) {
+      this.setState(state)
+    }
+  }
+
+  handleLoopSection = (values, handle) => {
+    // https://refreshless.com/nouislider/examples/#section-steps-api
+    // var value = values[handle];
+
+    // if (handle) {
+    //     console.log('startloop', value);
+    //     this.setState({ seeking: true })
+    //     this.setState({ played: parseFloat(value) })
+    // } else {
+    //     console.log('endloop', value);
+    //     // while (this.state.played === parseFloat(value)) {
+    //     //   this.setState({ played: parseFloat(value) }) // go back to the beginning of the loop
+    //     // }
+    // }
   }
 
   render() {
@@ -99,6 +119,8 @@ class MediaComponent extends Component {
             onPlay={this.handlePlay}
             onPause={this.handlePause}
             mirrored={mirrored}
+            onSeek={e => console.log('onSeek', e)}
+            onProgress={this.handleProgress}
             />
         </div>
 
@@ -109,12 +131,10 @@ class MediaComponent extends Component {
           <input
                     type='range' min={0} max={0.999999} step='any'
                     value={played}
-                    onMouseDown={this.handleSeekMouseDown}
                     onChange={this.handleSeekChange}
-                    onMouseUp={this.handleSeekMouseUp}
                   />
-          <div>
-          </div>
+           <Nouislider range={{ min: 0, max: 0.999999 }} start={[0, 0.999999]} connect onUpdate={this.handleLoopSection}/>
+          
         </div>
 
       </>
