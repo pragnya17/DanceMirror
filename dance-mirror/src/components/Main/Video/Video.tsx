@@ -22,23 +22,27 @@
 
 import React, { Component } from "react";
 import ReactPlayer from "react-player";
-//import $ from 'jquery'
+import $ from 'jquery'
 import 'bootstrap'
 import Nouislider from "nouislider-react";
 import "nouislider/distribute/nouislider.css";
+import FilePlayer from "react-player/file";
 //import 'jquery'
 //<><script src="//code.jquery.com/jquery-1.10.2.js"></script><script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script></>
 
 class MediaComponent extends Component {
   
+  state = { playing:false, playbackRate:1, mirrored:false, played:0, seeking:false, startloop:0, endloop:1}
 
+  // create ref as part of the component in order to refer to it in other functions
   private ref: React.RefObject<ReactPlayer>;
   constructor(props) {
     super(props)
     this.ref = React.createRef()
+    // bind handleLoopSection to this
+    // this.handleLoopSeeking=this.handleLoopSeeking.bind(this)
+    //this.checkLoop=this.checkLoop.bind(this)
   }
-
-  state = { playing:false, playbackRate:1, mirrored:false, played:0, seeking:false}
 
 
   handlePlayPause = () => {
@@ -88,22 +92,63 @@ class MediaComponent extends Component {
     if (!this.state.seeking) {
       this.setState(state)
     }
+  }  
+
+  handleLoopSeeking = (values, handle) => {
+    // https://refreshless.com/nouislider/examples/#section-steps-api
+    var value = values[handle];
+    const player = this.ref.current
+    var start = this.state.startloop
+    if (!handle) {
+        //console.log('startloop', value);
+        // update the video by going to the correct time
+        player.seekTo(value)
+        this.setState({startloop:value})
+        //console.log("test", start)
+    } else {
+        //console.log('endloop', value);
+        player.seekTo(value)
+        this.setState({endloop:value})
+        // while (this.state.played === parseFloat(value)) {
+        //   this.setState({ played: pars(eFloat(value) }) // go back to the beginning of the loop
+        // }
+    }
+    
   }
 
-  handleLoopSection = (values, handle) => {
-    // https://refreshless.com/nouislider/examples/#section-steps-api
-    // var value = values[handle];
-
-    // if (handle) {
-    //     console.log('startloop', value);
-    //     this.setState({ seeking: true })
-    //     this.setState({ played: parseFloat(value) })
-    // } else {
-    //     console.log('endloop', value);
-    //     // while (this.state.played === parseFloat(value)) {
-    //     //   this.setState({ played: parseFloat(value) }) // go back to the beginning of the loop
-    //     // }
-    // }
+  handleLoopSection = () => {
+    // console.log(this.state.played)
+    // const player = this.ref.current
+    // setInterval(function() {
+    //   if (this.state.played === this.endloop) { // if you reach the end, go back to beginning of loop
+    //     player.seekTo(this.startloop)
+    //   }
+    // }, 1)
+    var checkbox = document.querySelector("input[name=loop]");
+    const player = this.ref.current
+    var globalstate = this.state
+    var startofloop = this.state.startloop
+    var endofloop = this.state.endloop
+    checkbox.addEventListener('change', function checkLoop(){
+      var varthis = this
+      var test = 0
+      setInterval(function innerCheckLoop() {
+        //console.log("this", this)
+        if (varthis.checked) {
+          test += .01
+          //console.log("Checkbox is checked..");
+          //console.log("endloop", this.state)
+          // get amt of time passed from the seeker input HTML element, slice to get first 4 characters which is just 0.xx (two decimal places)
+          let timepassed = parseFloat((document.getElementById('seeker') as HTMLInputElement).value.slice(0,4))
+          console.log("timepassed", timepassed)
+          console.log('endofloop', endofloop)
+          if (endofloop >= timepassed-0.01 && endofloop <= timepassed+.01) { // if you reach the end, go back to beginning of loop
+            console.log("reached end of loop")    
+            player.seekTo(startofloop)
+              }
+      } 
+    }, 1); 
+    });
   }
 
   render() {
@@ -113,7 +158,7 @@ class MediaComponent extends Component {
         <div id="videoplayer" className="middle">
           <ReactPlayer
             ref={this.ref}
-            url='https://www.youtube.com/embed/E7wJTI-1dvQ'
+            url='https://www.youtube.com/watch?v=waSeaayuZ-k'
             playing={playing}
             playbackRate={playbackRate}
             onPlay={this.handlePlay}
@@ -124,6 +169,7 @@ class MediaComponent extends Component {
             />
         </div>
 
+        {/* Controls: Regular and extra are both included here */}
         <div id="controls" className="middle">
           <button onClick={this.handlePlayPause}>{playing ? 'Pause' : 'Play'}</button>
           Speed: <input id="speed" type="number" onChange={this.handleSpeed}/>
@@ -132,9 +178,12 @@ class MediaComponent extends Component {
                     type='range' min={0} max={0.999999} step='any'
                     value={played}
                     onChange={this.handleSeekChange}
+                    id="seeker"
+                    name="seeker"
                   />
-           <Nouislider range={{ min: 0, max: 0.999999 }} start={[0, 0.999999]} connect onUpdate={this.handleLoopSection}/>
-          
+          <Nouislider range={{ min: 0, max: 0.999999 }} start={[0, 0.999999]} connect onUpdate={this.handleLoopSeeking}/>
+          <input type="checkbox" id="loop" value="loop" name="loop" onClick={this.handleLoopSection}></input>
+          <label htmlFor="loop"> Loop </label><br></br>
         </div>
 
       </>
