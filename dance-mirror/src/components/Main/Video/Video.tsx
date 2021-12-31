@@ -150,14 +150,14 @@ class MediaComponent extends Component {
           console.log("timepassed", timepassed)
           // console.log('endofloop', endofloop)
           // console.log(endofloop===timepassed)
-          //if (endofloop >= timepassed-0.01 && endofloop <= timepassed+.01) { // if you reach the end, go back to beginning of loop
-          if (endofloop === timepassed) {  
+          if (endofloop >= timepassed-0.01 && endofloop <= timepassed+0.01) { // if you reach the end, go back to beginning of loop
+          //if (endofloop === parseFloat(timepassed.toFixed(2))) {  
             console.log("reached end of loop")    
             player.seekTo(startofloop)
-            globalthis.setState({startloop:startofloop})
+            globalthis.setState({played:startofloop})
           }
       } 
-    }, 1); 
+    }, 3); 
     });
   }
 
