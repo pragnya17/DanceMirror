@@ -84,6 +84,7 @@ class MediaComponent extends Component {
     const player = this.ref.current
     // update the video by going to the correct time
     player.seekTo(parseFloat(e.target.value))
+    this.setState({ seeking: false })
   }
 
   handleProgress = state => {
@@ -124,28 +125,37 @@ class MediaComponent extends Component {
     //     player.seekTo(this.startloop)
     //   }
     // }, 1)
-    var checkbox = document.querySelector("input[name=loop]");
+    var globalthis = this // referring to the mediacomponent
+    
     const player = this.ref.current
-    var globalstate = this.state
     var startofloop = this.state.startloop
     var endofloop = this.state.endloop
+
+    var checkbox = document.querySelector("input[name=loop]");
     checkbox.addEventListener('change', function checkLoop(){
-      var varthis = this
-      var test = 0
+      var thischeckbox = this
+      // set it to the beginning the first time
+      if (thischeckbox.checked) {
+        player.seekTo(startofloop)
+        globalthis.setState({startloop:startofloop})
+      }
       setInterval(function innerCheckLoop() {
         //console.log("this", this)
-        if (varthis.checked) {
-          test += .01
+        if (thischeckbox.checked) {
           //console.log("Checkbox is checked..");
           //console.log("endloop", this.state)
           // get amt of time passed from the seeker input HTML element, slice to get first 4 characters which is just 0.xx (two decimal places)
-          let timepassed = parseFloat((document.getElementById('seeker') as HTMLInputElement).value.slice(0,4))
+          //let timepassed = parseFloat((document.getElementById('seeker') as HTMLInputElement).value.slice(0,4))
+          let timepassed = globalthis.state.played
           console.log("timepassed", timepassed)
-          console.log('endofloop', endofloop)
-          if (endofloop >= timepassed-0.01 && endofloop <= timepassed+.01) { // if you reach the end, go back to beginning of loop
+          // console.log('endofloop', endofloop)
+          // console.log(endofloop===timepassed)
+          //if (endofloop >= timepassed-0.01 && endofloop <= timepassed+.01) { // if you reach the end, go back to beginning of loop
+          if (endofloop === timepassed) {  
             console.log("reached end of loop")    
             player.seekTo(startofloop)
-              }
+            globalthis.setState({startloop:startofloop})
+          }
       } 
     }, 1); 
     });
