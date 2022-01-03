@@ -97,6 +97,11 @@ class MediaComponent extends Component {
 
   handleLoopSeeking = (values, handle) => {
     // https://refreshless.com/nouislider/examples/#section-steps-api
+    var checkbox = (document.getElementById('loop') as HTMLInputElement)
+    if (checkbox.checked){
+      checkbox.checked = false
+    }
+
     var value = values[handle];
     const player = this.ref.current
     var start = this.state.startloop
@@ -128,16 +133,14 @@ class MediaComponent extends Component {
     var globalthis = this // referring to the mediacomponent
     
     const player = this.ref.current
-    var startofloop = this.state.startloop
-    var endofloop = this.state.endloop
 
     var checkbox = document.querySelector("input[name=loop]");
     checkbox.addEventListener('change', function checkLoop(){
       var thischeckbox = this
       // set it to the beginning the first time
       if (thischeckbox.checked) {
-        player.seekTo(startofloop)
-        globalthis.setState({startloop:startofloop})
+        player.seekTo(globalthis.state.startloop)
+        globalthis.setState({played:globalthis.state.startloop})
       }
       setInterval(function innerCheckLoop() {
         //console.log("this", this)
@@ -147,14 +150,14 @@ class MediaComponent extends Component {
           // get amt of time passed from the seeker input HTML element, slice to get first 4 characters which is just 0.xx (two decimal places)
           //let timepassed = parseFloat((document.getElementById('seeker') as HTMLInputElement).value.slice(0,4))
           let timepassed = globalthis.state.played
-          console.log("timepassed", timepassed)
+          //console.log("timepassed", timepassed)
           // console.log('endofloop', endofloop)
           // console.log(endofloop===timepassed)
-          if (endofloop >= timepassed-0.01 && endofloop <= timepassed+0.01) { // if you reach the end, go back to beginning of loop
+          if (globalthis.state.endloop >= timepassed-0.01 && globalthis.state.endloop <= timepassed+0.01) { // if you reach the end, go back to beginning of loop
           //if (endofloop === parseFloat(timepassed.toFixed(2))) {  
             console.log("reached end of loop")    
-            player.seekTo(startofloop)
-            globalthis.setState({played:startofloop})
+            player.seekTo(globalthis.state.startloop)
+            globalthis.setState({played:globalthis.state.startloop})
           }
       } 
     }, 3); 
@@ -191,7 +194,7 @@ class MediaComponent extends Component {
                     id="seeker"
                     name="seeker"
                   />
-          <Nouislider range={{ min: 0, max: 0.999999 }} start={[0, 0.999999]} connect onUpdate={this.handleLoopSeeking}/>
+          <Nouislider id='loopseeker' range={{ min: 0, max: 0.999999 }} start={[0, 0.999999]} connect onUpdate={this.handleLoopSeeking}/>
           <input type="checkbox" id="loop" value="loop" name="loop" onClick={this.handleLoopSection}></input>
           <label htmlFor="loop"> Loop </label><br></br>
         </div>
