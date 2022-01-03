@@ -1,32 +1,9 @@
-//import React from 'react';
-// // import {Row, Col} from 'react-bootstrap';
-// // import {isMobile} from 'react-device-detect';
-// import { ReactVideo } from "reactjs-media";
-
-// interface Props {
-//   id: string;
-// }
-
-// function Video(props: Props) {
-//   return (
-//     <div id={props.id}>
-//         <ReactVideo src="https://www.youtube.com/watch?v=waSeaayuZ-k"
-//                 //primaryColor="red"
-//                 // other props
-//         />
-//     </div>
-//   );
-// }
-
-// export default Video;
-
 import React, { Component } from "react";
 import ReactPlayer from "react-player";
-import $ from 'jquery'
 import 'bootstrap'
 import Nouislider from "nouislider-react";
 import "nouislider/distribute/nouislider.css";
-import FilePlayer from "react-player/file";
+import {Row, Col} from 'react-bootstrap';
 //import 'jquery'
 //<><script src="//code.jquery.com/jquery-1.10.2.js"></script><script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script></>
 
@@ -39,9 +16,6 @@ class MediaComponent extends Component {
   constructor(props) {
     super(props)
     this.ref = React.createRef()
-    // bind handleLoopSection to this
-    // this.handleLoopSeeking=this.handleLoopSeeking.bind(this)
-    //this.checkLoop=this.checkLoop.bind(this)
   }
 
 
@@ -115,21 +89,11 @@ class MediaComponent extends Component {
         //console.log('endloop', value);
         player.seekTo(value)
         this.setState({endloop:value})
-        // while (this.state.played === parseFloat(value)) {
-        //   this.setState({ played: pars(eFloat(value) }) // go back to the beginning of the loop
-        // }
     }
     
   }
 
   handleLoopSection = () => {
-    // console.log(this.state.played)
-    // const player = this.ref.current
-    // setInterval(function() {
-    //   if (this.state.played === this.endloop) { // if you reach the end, go back to beginning of loop
-    //     player.seekTo(this.startloop)
-    //   }
-    // }, 1)
     var globalthis = this // referring to the mediacomponent
     
     const player = this.ref.current
@@ -147,12 +111,8 @@ class MediaComponent extends Component {
         if (thischeckbox.checked) {
           //console.log("Checkbox is checked..");
           //console.log("endloop", this.state)
-          // get amt of time passed from the seeker input HTML element, slice to get first 4 characters which is just 0.xx (two decimal places)
-          //let timepassed = parseFloat((document.getElementById('seeker') as HTMLInputElement).value.slice(0,4))
           let timepassed = globalthis.state.played
           //console.log("timepassed", timepassed)
-          // console.log('endofloop', endofloop)
-          // console.log(endofloop===timepassed)
           if (globalthis.state.endloop >= timepassed-0.01 && globalthis.state.endloop <= timepassed+0.01) { // if you reach the end, go back to beginning of loop
           //if (endofloop === parseFloat(timepassed.toFixed(2))) {  
             console.log("reached end of loop")    
@@ -184,9 +144,7 @@ class MediaComponent extends Component {
 
         {/* Controls: Regular and extra are both included here */}
         <div id="controls" className="middle">
-          <button onClick={this.handlePlayPause}>{playing ? 'Pause' : 'Play'}</button>
-          Speed: <input id="speed" type="number" onChange={this.handleSpeed}/>
-          <button onClick={this.handleMirror}>{mirrored ? 'Unmirror' : 'Mirror'}</button>
+          <Row>
           <input
                     type='range' min={0} max={0.999999} step='any'
                     value={played}
@@ -194,6 +152,11 @@ class MediaComponent extends Component {
                     id="seeker"
                     name="seeker"
                   />
+          </Row>  
+          <button onClick={this.handlePlayPause}>{playing ? 'Pause' : 'Play'}</button>
+          Speed: <input id="speed" type="number" onChange={this.handleSpeed}/>
+          <button onClick={this.handleMirror}>{mirrored ? 'Unmirror' : 'Mirror'}</button>
+          
           <Nouislider id='loopseeker' range={{ min: 0, max: 0.999999 }} start={[0, 0.999999]} connect onUpdate={this.handleLoopSeeking}/>
           <input type="checkbox" id="loop" value="loop" name="loop" onClick={this.handleLoopSection}></input>
           <label htmlFor="loop"> Loop </label><br></br>
