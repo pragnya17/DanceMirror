@@ -4,18 +4,35 @@ import 'bootstrap'
 import Nouislider from "nouislider-react";
 import "nouislider/distribute/nouislider.css";
 import {Row, Col} from 'react-bootstrap';
-//import 'jquery'
-//<><script src="//code.jquery.com/jquery-1.10.2.js"></script><script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script></>
 
 class MediaComponent extends Component {
   
-  state = { playing:false, playbackRate:1, mirrored:false, played:0, seeking:false, startloop:0, endloop:1}
+  state = { 
+    url:null,
+    playing:false, 
+    playbackRate:1, 
+    mirrored:false, 
+    played:0, 
+    seeking:false, 
+    startloop:0, 
+    endloop:1
+  }
+
+  load = url => {
+    this.setState({
+      url,
+      played: 0,
+      loaded: 0
+    })
+  }
 
   // create ref as part of the component in order to refer to it in other functions
   private ref: React.RefObject<ReactPlayer>;
+  private urlInput;
   constructor(props) {
     super(props)
     this.ref = React.createRef()
+    this.urlInput = ""
   }
 
 
@@ -124,14 +141,29 @@ class MediaComponent extends Component {
     });
   }
 
+  renderLoadButton = (url, label) => {
+    return (
+      <button onClick={() => this.load(url)}>
+        {label}
+      </button>
+    )
+  }
+
   render() {
-    const { playing, playbackRate, mirrored, played } = this.state
+    const { playing, playbackRate, mirrored, played, url } = this.state
     return (
       <>
+        <input ref={input => { this.urlInput = input }} type='text' placeholder='Enter URL' />
+        <button onClick={() => this.setState({ url: this.urlInput.value })}>Load</button>
+
+        
+        <div>No video loaded </div>
+        
         <div id="videoplayer" className="middle">
+          
           <ReactPlayer
             ref={this.ref}
-            url='https://www.youtube.com/watch?v=waSeaayuZ-k'
+            url={url}
             playing={playing}
             playbackRate={playbackRate}
             onPlay={this.handlePlay}
@@ -141,6 +173,7 @@ class MediaComponent extends Component {
             onProgress={this.handleProgress}
             />
         </div>
+        
 
         {/* Controls: Regular and extra are both included here */}
         <div id="controls" className="middle">
@@ -154,7 +187,7 @@ class MediaComponent extends Component {
                   />
           </Row>  
           <button onClick={this.handlePlayPause}>{playing ? 'Pause' : 'Play'}</button>
-          Speed: <input id="speed" type="number" onChange={this.handleSpeed}/>
+          Speed: <input id="speed" type="number" step="0.1" min="0.1" max="2" placeholder="1" onChange={this.handleSpeed}/>
           <button onClick={this.handleMirror}>{mirrored ? 'Unmirror' : 'Mirror'}</button>
           
           <Nouislider id='loopseeker' range={{ min: 0, max: 0.999999 }} start={[0, 0.999999]} connect onUpdate={this.handleLoopSeeking}/>
